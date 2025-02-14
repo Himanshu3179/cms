@@ -9,7 +9,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const instance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // 10-second timeout
+  timeout: 30000,
 });
 
 // Add a request interceptor to include the token in the headers
@@ -44,7 +44,7 @@ export const fetchFeeds = async (params: {
     const response = await instance.get<FeedResponse>("/feeds", { params });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.error || "Failed to fetch feeds.");
+    throw new Error(error.response?.data?.message || "Failed to fetch feeds.");
   }
 };
 
@@ -53,7 +53,7 @@ export const fetchFeedById = async (id: string): Promise<Feed> => {
     const response = await instance.get<Feed>(`/feeds/${id}`);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.error || "Failed to fetch feed.");
+    throw new Error(error.response?.data?.message || "Failed to fetch feed.");
   }
 };
 
@@ -62,7 +62,9 @@ export const fetchFilters = async (): Promise<FiltersResponse> => {
     const response = await instance.get<FiltersResponse>("/filters");
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.error || "Failed to fetch filters.");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch filters."
+    );
   }
 };
 
@@ -322,6 +324,40 @@ export const fetchAdminArticlesByUserId = async (
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message || "Failed to fetch admin articles."
+    );
+  }
+};
+
+// Chat API
+export const handleChatRequest = async (data: {
+  modelAuthor: string;
+  selectedArticleIds: string[];
+  userInstructions: string;
+}): Promise<{ generatedArticle: string; tokenUsage: number }> => {
+  try {
+    const response = await instance.post<{
+      generatedArticle: string;
+      tokenUsage: number;
+    }>("/chat", data);
+    return response.data;
+  } catch (error: any) {
+    console.log(error.response);
+    throw new Error(
+      error.response?.data?.message || "Failed to handle chat request."
+    );
+  }
+};
+
+export const getAvailableModelAuthors = async (): Promise<{
+  models: string[];
+}> => {
+  try {
+    const response = await instance.get<{ models: string[] }>("/chat");
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to fetch available model authors."
     );
   }
 };

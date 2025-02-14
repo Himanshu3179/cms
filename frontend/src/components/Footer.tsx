@@ -9,22 +9,13 @@ const Footer: React.FC = () => {
             &copy; {new Date().getFullYear()} Your Company. All rights reserved.
           </div>
           <div className="flex space-x-4">
-            <a
-              href="/privacy-policy"
-              className="text-sm hover:text-gray-700"
-            >
+            <a href="/privacy-policy" className="text-sm hover:text-gray-700">
               Privacy Policy
             </a>
-            <a
-              href="/terms-of-service"
-              className="text-sm hover:text-gray-700"
-            >
+            <a href="/terms-of-service" className="text-sm hover:text-gray-700">
               Terms of Service
             </a>
-            <a
-              href="/contact"
-              className="text-sm hover:text-gray-700"
-            >
+            <a href="/contact" className="text-sm hover:text-gray-700">
               Contact
             </a>
           </div>

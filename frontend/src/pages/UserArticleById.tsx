@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchUserArticleById } from "../api";
 import { Article } from "../types/article";
@@ -41,7 +41,10 @@ const UserArticleById: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-      <p className="text-gray-600 mb-4">{article.description}</p>
+      <div
+        className="text-gray-600 mb-4"
+        dangerouslySetInnerHTML={{ __html: article.description }}
+      />
       <div className="flex flex-wrap gap-2 mb-4">
         {article.category.map((category, index) => (
           <span

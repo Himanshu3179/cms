@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { fetchFeedById } from "../api";
 import { Feed } from "../types/feeds";
+import { ArrowLeft } from "lucide-react";
 
 const RssArticleById: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,7 +16,6 @@ const RssArticleById: React.FC = () => {
       try {
         if (id) {
           const data = await fetchFeedById(id);
-
           setFeed(data);
         }
       } catch (err: any) {
@@ -40,48 +41,57 @@ const RssArticleById: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">{feed.title}</h1>
-      <div
-        className="text-gray-600 mb-4"
-        dangerouslySetInnerHTML={{ __html: feed.description }}
-      />
-      <div className="flex flex-wrap gap-2 mb-4">
-        {feed.category.map((category, index) => (
-          <span
-            key={index}
-            className="px-3 py-1 rounded-full text-sm"
-            style={{ backgroundColor: "#E5E7EB", color: "#1F2937" }}
-          >
-            {category}
-          </span>
-        ))}
-      </div>
-      <div>
-        <div>
-          Source :-
-          <Link
-            to={feed.sourceUrl}
-            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
-          >
-            {" "}
-            {feed.sourceUrl}
-          </Link>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-4 px-4 py-2 flex gap-2 items-center bg-gray-200 rounded-lg hover:bg-gray-00"
+      >
+        <ArrowLeft size={20} />
+        Back
+      </button>
+      <div className="max-w-4xl mx-auto px-4 ">
+        <h1 className="text-3xl font-bold mb-4">{feed.title}</h1>
+        <div
+          className="text-gray-600 mb-4"
+          dangerouslySetInnerHTML={{ __html: feed.description }}
+        />
+        <div className="flex flex-wrap gap-2 mb-4">
+          {feed.category.map((category, index) => (
+            <span
+              key={index}
+              className="px-3 py-1 rounded-full text-sm"
+              style={{ backgroundColor: "#E5E7EB", color: "#1F2937" }}
+            >
+              {category}
+            </span>
+          ))}
         </div>
         <div>
-          Link :-
-          <Link
-            to={feed.link}
-            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
-          >
-            {" "}
-            {feed.link}
-          </Link>
+          <div>
+            Source :-
+            <Link
+              to={feed.sourceUrl}
+              className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+            >
+              {" "}
+              {feed.sourceUrl}
+            </Link>
+          </div>
+          <div>
+            Link :-
+            <Link
+              to={feed.link}
+              className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+            >
+              {" "}
+              {feed.link}
+            </Link>
+          </div>
         </div>
+        <p className="text-sm text-gray-500 mt-4">
+          Published on: {new Date(feed.pubDate).toLocaleDateString()}
+        </p>
       </div>
-      <p className="text-sm text-gray-500 mt-4">
-        Published on: {new Date(feed.pubDate).toLocaleDateString()}
-      </p>
     </div>
   );
 };
