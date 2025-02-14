@@ -19,25 +19,28 @@ const router = express.Router();
 // Get all articles (including user-created and fetched ones)
 router.get("/", getArticles);
 
+// Apply authMiddleware to all routes
+router.use(authMiddleware);
+
 // Get a specific article by ID
-router.get("/:id", authMiddleware, getArticleById);
+router.get("/:id", getArticleById);
 
 // get published admin article by id
-router.get("/published/:id", authMiddleware, getPublishedAdminArticleById);
+router.get("/published/:id", getPublishedAdminArticleById);
 
 // Get articles by user ID
-router.get("/user/:userId", authMiddleware, getArticlesByUserId);
+router.get("/user/:userId", getArticlesByUserId);
 
 // Create a new article (protected, writer access required)
-router.post("/", authMiddleware, writerMiddleware, createArticle);
+router.post("/", writerMiddleware, createArticle);
 
 // Update an article (protected, writer access required)
-router.put("/:id", authMiddleware, writerMiddleware, updateArticle);
+router.put("/:id", writerMiddleware, updateArticle);
 
 // Delete an article (protected, writer access required)
-router.delete("/:id", authMiddleware, writerMiddleware, deleteArticle);
+router.delete("/:id", writerMiddleware, deleteArticle);
 
 // Admin-only route to delete any article
-router.delete("/admin/:id", authMiddleware, adminMiddleware, deleteArticle);
+router.delete("/admin/:id", adminMiddleware, deleteArticle);
 
 export default router;

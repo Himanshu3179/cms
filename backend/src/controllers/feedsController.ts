@@ -22,7 +22,7 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
       query.$or = [
         { title: { $regex: search as string, $options: "i" } },
         { description: { $regex: search as string, $options: "i" } },
-        { category: { $regex: search as string, $options: "i" } }
+        { category: { $regex: search as string, $options: "i" } },
       ];
     }
 
@@ -74,7 +74,7 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    res.status(500).json({ error: "Failed to fetch feeds." });
+    res.status(500).json({ message: "Failed to fetch feeds." });
   }
 };
 
@@ -86,12 +86,12 @@ export const getFeedById = async (
   try {
     const feed = await Feed.findById(req.params.id);
     if (!feed) {
-      res.status(404).json({ error: "Feed not found." });
+      res.status(404).json({ message: "Feed not found." });
       return;
     }
 
     res.json(feed);
   } catch (error: any) {
-    res.status(500).json({ error: "Failed to fetch feed." });
+    res.status(500).json({ message: "Failed to fetch feed." });
   }
 };

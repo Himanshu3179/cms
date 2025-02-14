@@ -43,7 +43,6 @@ export const getFilters = async (req: Request, res: Response) => {
       dates: formattedDates,
     });
   } catch (error: any) {
-    console.error("Error fetching filters:", error);
-    res.status(500).json({ error: "Failed to fetch filters." });
+    res.status(500).json({ message: "Failed to fetch filters." });
   }
 };

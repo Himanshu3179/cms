@@ -7,31 +7,29 @@ import {
   deleteAdminArticle,
   getAdminArticlesByUserId,
 } from "../controllers/adminArticleController";
-import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
 // Get all admin articles
-router.get("/", authMiddleware, adminMiddleware, getAdminArticles);
+router.get("/", getAdminArticles);
 
 // Get a specific admin article by ID
-router.get("/:id", authMiddleware, adminMiddleware, getAdminArticleById);
+router.get("/:id", getAdminArticleById);
 
 // getAdminArticlesByUserId
 router.get(
   "/user/:id",
-  authMiddleware,
-  adminMiddleware,
+
   getAdminArticlesByUserId
 );
 
 // Create a new admin article (protected, admin access required)
-router.post("/", authMiddleware, adminMiddleware, createAdminArticle);
+router.post("/", createAdminArticle);
 
 // Update an admin article (protected, admin access required)
-router.put("/:id", authMiddleware, adminMiddleware, updateAdminArticle);
+router.put("/:id", updateAdminArticle);
 
 // Delete an admin article (protected, admin access required)
-router.delete("/:id", authMiddleware, adminMiddleware, deleteAdminArticle);
+router.delete("/:id", deleteAdminArticle);
 
 export default router;
