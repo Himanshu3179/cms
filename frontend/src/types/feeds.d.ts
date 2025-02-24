@@ -4,6 +4,7 @@ export interface Feed {
   link: string;
   pubDate: string;
   category: string[];
+  customCategory: string[];
   description: string;
   sourceUrl: string;
   fetchedAt: Date;

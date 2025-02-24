@@ -5,6 +5,8 @@ export interface Feed {
   link?: string;
   pubDate?: string;
   category: string[];
+  customCategory: string[];
+  rejectedCategories: string[];
   sourceUrl?: string;
   fetchedAt?: string;
   createdAt?: string;

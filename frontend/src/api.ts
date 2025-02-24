@@ -333,15 +333,17 @@ export const handleChatRequest = async (data: {
   modelAuthor: string;
   selectedArticleIds: string[];
   userInstructions: string;
-}): Promise<{ generatedArticle: string; tokenUsage: number }> => {
+}): Promise<{ title: string; description: string }> => {
   try {
+    console.log(data);
     const response = await instance.post<{
-      generatedArticle: string;
-      tokenUsage: number;
+      title: string;
+      description: string;
     }>("/chat", data);
+
     return response.data;
   } catch (error: any) {
-    console.log(error.response);
+    console.error("❌ API Error in handleChatRequest:", error.response);
     throw new Error(
       error.response?.data?.message || "Failed to handle chat request."
     );

@@ -3,13 +3,25 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { fetchFeedById } from "../api";
 import { Feed } from "../types/feeds";
 import { ArrowLeft } from "lucide-react";
+import { useSelectedArticles } from "../context/SelectedArticlesContext";
 
 const RssArticleById: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
+  if (typeof id !== "string") {
+    throw new Error("Invalid id");
+  }
   const navigate = useNavigate();
+  const { selectedArticles, addArticle, removeArticle } = useSelectedArticles();
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const handleToggle = (id: string) => {
+    if (selectedArticles.includes(id)) {
+      removeArticle(id);
+    } else {
+      addArticle(id);
+    }
+  };
 
   useEffect(() => {
     const loadFeed = async () => {
@@ -42,13 +54,24 @@ const RssArticleById: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 px-4 py-2 flex gap-2 items-center bg-gray-200 rounded-lg hover:bg-gray-00"
-      >
-        <ArrowLeft size={20} />
-        Back
-      </button>
+      <div className="flex justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-4 px-4 py-2 flex gap-2 items-center bg-gray-200 rounded-lg hover:bg-gray-00"
+        >
+          <ArrowLeft size={20} />
+          Back
+        </button>
+        <div className="flex gap-2 justify-center items-center">
+          <p>Add to AI Editor</p>
+          <input
+            type="checkbox"
+            className="custom-checkbox ml-2"
+            checked={selectedArticles.includes(id)}
+            onChange={() => handleToggle(id)}
+          />
+        </div>
+      </div>
       <div className="max-w-4xl mx-auto px-4 ">
         <h1 className="text-3xl font-bold mb-4">{feed.title}</h1>
         <div

@@ -73,18 +73,53 @@ export const handleChatRequest = async (
 
     // ✅ Construct AI Prompt
     const prompt = `
-      You are an AI journalist assistant. Based on the following articles:
+      You are an expert AI journalist assistant skilled in crafting highly engaging, well-structured, and SEO-optimized news articles. Your task is to rewrite the given article in an engaging, informative, and professional manner, ensuring it aligns with modern journalism standards.
+
+      ### **Provided Article:**
       ${articleContext}
 
-      Write a new article according to the user’s instructions: "${userInstructions}". 
-      The article should include:
-      - A **title** that is catchy and relevant.
-      - A **short description** summarizing the article.
-      - A **detailed content body**.
+      ### **User Instructions:**
+      "${userInstructions}"
 
-      All 3 in seperate lines.
-      Ensure the output follows the selected model’s writing style.
-    `;
+      ### **Writing Style & Engagement Guidelines:**
+      - **Tone & Style:** Professional, engaging, and journalistic.
+      - **Clarity & Readability:** Maintain short, impactful sentences for easy reading.
+      - **Emphasize Key Points:** Use **bold** text for important information and *italics* for notable terms.
+      - **Logical Flow:** Ensure smooth transitions between paragraphs.
+      - **Hook & CTA:** Start with a compelling hook and end with a call to action or key takeaway.
+
+      ### **SEO Optimization Guidelines:**
+      - **Primary Keywords:** Extract key phrases from the article and integrate them naturally.
+      - **Meta Description:** Generate a compelling meta description (120-160 characters).
+      - **SEO Tags:** Provide relevant **SEO-friendly title, meta description, and keyword tags**.
+      - **Internal & External Links:** Ensure proper link placement for enhanced SEO value.
+      - **Headings:** Use proper **H1, H2, H3** tags for better readability and SEO.
+
+      ### **Formatting Guidelines:**
+      - **Title:** Catchy, keyword-rich, and engaging.
+      - **Description:** Well-formatted Markdown content with:
+        - Bullet points for structured information.
+        - Proper paragraph spacing for readability.
+        - SEO-optimized keyword usage.
+
+      ### **Expected Output Format (Must be a Valid JSON Object):**
+      \`\`\`json
+      {
+        "title": "[Generated Title with Keywords]",
+        "description": "[Generated Content in Markdown]",
+        "seo": {
+          "meta_title": "[SEO Optimized Title]",
+          "meta_description": "[Compelling Meta Description]",
+          "keywords": ["keyword1", "keyword2", "keyword3"]
+        }
+      }
+      \`\`\`
+
+      ### **Important Rules:**
+      - The response **must be in valid JSON format**.
+      - Ensure the **description** is fully formatted in Markdown.
+      - Do **not** include any extra text outside the JSON output.
+      `;
 
     // ✅ OpenAI API Call
     const response = await openai.chat.completions.create({
@@ -104,11 +139,21 @@ export const handleChatRequest = async (
     const tokenUsage = response.usage?.total_tokens;
     console.log(`Token usage: ${tokenUsage}`);
 
-    // ✅ Send Response
-    res.json({
-      generatedArticle: response.choices[0]?.message?.content || "No response",
-      tokenUsage,
-    });
+    let responseText = response.choices[0]?.message?.content || "{}";
+
+    // ✅ Remove backticks from the response text
+    responseText = responseText.replace(/```json/g, "").replace(/```/g, "");
+
+    try {
+      const parsedData = JSON.parse(responseText);
+      const title = parsedData.title || "Untitled";
+      const description = parsedData.description || "No description available.";
+
+      res.status(200).json({ title, description });
+    } catch (error) {
+      console.error("❌ Error parsing JSON response:", error);
+      res.status(500).json({ message: "Error parsing JSON response from AI." });
+    }
   } catch (error: any) {
     console.error("❌ Error in handleChatRequest:", error);
     res

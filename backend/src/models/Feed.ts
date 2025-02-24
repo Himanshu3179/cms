@@ -7,6 +7,8 @@ const feedSchema = new mongoose.Schema(
     link: { type: String },
     pubDate: { type: Date },
     category: [{ type: String }],
+    customCategory: [{ type: String, default: [] }],
+    rejectedCategories: [{ type: String, default: [] }],
     sourceUrl: { type: String },
     fetchedAt: { type: Date, default: Date.now },
   },

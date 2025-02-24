@@ -6,10 +6,10 @@ import {
   handleChatRequest,
 } from "../../api"; // Import the handleChatRequest function
 import { Feed } from "../../types";
-import { Plus, Trash2 } from "lucide-react";
+import { Loader, Plus, Trash2 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
-import ChatWindow from "../../components/ChatWindow"; // Import ChatWindow component
 import toast from "react-hot-toast";
+import OutputSection from "../../components/OutputSection";
 
 const AIEditor: React.FC = () => {
   const { selectedArticles, removeArticle } = useSelectedArticles();
@@ -21,6 +21,11 @@ const AIEditor: React.FC = () => {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>(
     []
   );
+  const [latestOutput, setLatestOutput] = useState({
+    title: "",
+    description: "",
+  });
+
   const [isGenerating, setIsGenerating] = useState(false); // ✅ Track loading state
 
   useEffect(() => {
@@ -107,7 +112,10 @@ const AIEditor: React.FC = () => {
   };
 
   const handleSendMessage = async (message: string) => {
-    setMessages([...messages, { role: "user", content: message }]);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", content: message },
+    ]);
     setIsGenerating(true); // ✅ Show "Generating..." indicator
 
     try {
@@ -119,8 +127,13 @@ const AIEditor: React.FC = () => {
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "assistant", content: response.generatedArticle },
+        { role: "assistant", content: response.description },
       ]);
+
+      setLatestOutput({
+        title: response.title,
+        description: response.description,
+      });
     } catch (error: any) {
       toast.error(error.message);
       setMessages((prevMessages) => [
@@ -128,21 +141,17 @@ const AIEditor: React.FC = () => {
         { role: "assistant", content: "Failed to generate response." },
       ]);
     } finally {
-      setIsGenerating(false); // ✅ Remove "Generating..." when response is received
+      setIsGenerating(false);
     }
-  };
-
-  const handleRefreshChat = () => {
-    setMessages([]);
   };
 
   return (
     <div className="max-w-7xl mx-auto ">
       <h1 className="text-2xl font-bold text-gray-800 mb-4">AI Editor</h1>
-      <div className="flex flex-row-reverse gap-5">
-        <div className="w-1/4">
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="flex flex-row gap-5">
+        <div className="w-1/3 flex flex-col space-y-5">
+          <div>
+            <label className="block font-bold text-gray-700 mb-2 ">
               Choose AI Model
             </label>
             <select
@@ -158,11 +167,36 @@ const AIEditor: React.FC = () => {
             </select>
           </div>
           <div>
+            <p className="font-bold text-gray-700 mb-2">
+              Tell AI what you want to do
+            </p>
+            <textarea
+              className="block w-full p-2 border border-gray-300 rounded-md"
+              disabled={isGenerating}
+              rows={4}
+              placeholder="Type your message here..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e.currentTarget.value);
+                  e.currentTarget.value = "";
+                }
+              }}
+            />
+            {/* generating */}
+            {isGenerating && (
+              <div className="flex gap-2 items-center mt-2">
+                <Loader className="h-8 w-8 animate-spin text-indigo-600" />
+                <p className=" text-gray-500">Generating...</p>
+              </div>
+            )}
+          </div>
+          <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className=" font-semibold text-gray-700 ">
                 Selected Articles
               </h2>
-              <button className="p-2 bg-blue-500 text-white rounded-lg hover:bg-red-600 flex items-center justify-center h-10 w-10">
+              <button className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center h-7 w-7">
                 <NavLink to="/admin/rss-articles">
                   <Plus className="h-5 w-5" />
                 </NavLink>
@@ -212,13 +246,14 @@ const AIEditor: React.FC = () => {
             )}
           </div>
         </div>
-
-        <ChatWindow
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          onRefreshChat={handleRefreshChat}
-          isGenerating={isGenerating}
-        />
+        <div className="w-2/3">
+          <OutputSection
+            title={latestOutput.title || "Title"}
+            description={
+              latestOutput.description || "Generated content will appear here."
+            }
+          />
+        </div>
       </div>
     </div>
   );

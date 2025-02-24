@@ -7,6 +7,7 @@ import adminArticleRoutes from "./adminArticleRoutes";
 import adminRoutes from "./adminRoutes";
 import chatRoutes from "./chatRoutes";
 import { adminMiddleware, authMiddleware } from "../middleware/authMiddleware";
+import customCategoryRoutes from "./customCategoryRoutes";
 
 const router = Router();
 
@@ -23,12 +24,20 @@ router.use("/articles", articleRoutes);
 router.use("/users", userRoutes);
 
 // Admin article routes
-router.use("/admin-articles",authMiddleware,adminMiddleware , adminArticleRoutes);
+router.use(
+  "/admin-articles",
+  authMiddleware,
+  adminMiddleware,
+  adminArticleRoutes
+);
 
 // Admin routes
 router.use("/admin", adminRoutes);
 
 // Chat routes
 router.use("/chat", chatRoutes);
+
+//custom category routes
+router.use("/custom-categories", customCategoryRoutes);
 
 export default router;
