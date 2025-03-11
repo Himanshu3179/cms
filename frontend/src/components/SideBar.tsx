@@ -12,12 +12,16 @@ import {
   Globe,
   LayoutDashboard,
   Database,
+  Bot,
+  Calendar1,
   ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
+import { useSelectedArticles } from "../context/SelectedArticlesContext";
 
 const SideBar = () => {
   const [isArticlesOpen, setIsArticlesOpen] = useState(true);
+  const { selectedArticles } = useSelectedArticles(); // Get selected articles and clearArticles function
 
   const navLinkStyles =
     "flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md";
@@ -28,11 +32,21 @@ const SideBar = () => {
     { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/admin/admin-articles", icon: FileText, label: "Admin Articles" },
     { to: "/admin/user-articles", icon: FileText, label: "User Articles" },
-    { to: "/admin/scheduled-posts", icon: Calendar, label: "Scheduled Posts" },
-    { to: "/admin/analytics", icon: BarChart2, label: "Analytics & Insights" },
-    { to: "/admin/keywords", icon: Tag, label: "Tags & Keywords" },
+    // { to: "/admin/scheduled-posts", icon: Calendar, label: "Scheduled Posts" },
+    // { to: "/admin/analytics", icon: BarChart2, label: "Analytics & Insights" },
+    // { to: "/admin/keywords", icon: Tag, label: "Tags & Keywords" },
+    { to: "/admin/calendar", icon: Calendar1, label: "Calendar" },
     { to: "/admin/source-management", icon: Globe, label: "Source Management" },
-    { to: "/admin/ai-editor", icon: Brain, label: "AI Editor" },
+    {
+      to: "/admin/ai-editor",
+      icon: Bot,
+      label: `AI Editor (${selectedArticles.length})`,
+    },
+    {
+      to: "/admin/ai-generated-articles",
+      icon: Brain,
+      label: "AI Generated Articles",
+    },
     { to: "/admin/user-management", icon: Users, label: "User Management" },
   ];
 

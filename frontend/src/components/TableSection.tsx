@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Feed } from "../types/feeds";
-import { Copy } from "lucide-react";
+import { Copy, Sparkles } from "lucide-react";
 import { useSelectedArticles } from "../context/SelectedArticlesContext"; // Import context
 
 interface TableSectionProps {
@@ -23,6 +23,7 @@ const TableSection: React.FC<TableSectionProps> = ({
   const [tableSelectedArticles, setTableSelectedArticles] = useState<string[]>(
     []
   );
+  const [selectAll, setSelectAll] = useState(false);
 
   const handleToggle = (id: string) => {
     if (selectedArticles.includes(id)) {
@@ -32,10 +33,28 @@ const TableSection: React.FC<TableSectionProps> = ({
     }
   };
 
+  const handleSelectAll = () => {
+    if (selectAll) {
+      feeds.forEach((feed) => {
+        if (selectedArticles.includes(feed._id)) {
+          removeArticle(feed._id);
+        }
+      });
+    } else {
+      feeds.forEach((feed) => {
+        if (!selectedArticles.includes(feed._id)) {
+          addArticle(feed._id);
+        }
+      });
+    }
+    setSelectAll(!selectAll);
+  };
+
   // Clear table selection when the Add To AI-Editor button is clicked
   useEffect(() => {
     if (clearTableSelection) {
       setTableSelectedArticles([]);
+      setSelectAll(false);
     }
   }, [clearTableSelection]);
 
@@ -44,7 +63,15 @@ const TableSection: React.FC<TableSectionProps> = ({
       <table className="w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
+              <input
+                type="checkbox"
+                className="custom-checkbox"
+                checked={selectAll}
+                onChange={handleSelectAll}
+              />
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Title
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -61,6 +88,14 @@ const TableSection: React.FC<TableSectionProps> = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {feeds.map((feed) => (
             <tr key={feed._id} className="hover:bg-gray-50 transition-colors">
+              <td className="px-6 py-4 max-w-xs">
+                <input
+                  type="checkbox"
+                  className="custom-checkbox"
+                  checked={selectedArticles.includes(feed._id)}
+                  onChange={() => handleToggle(feed._id)}
+                />
+              </td>
               <td className="px-6 py-4 max-w-xs">
                 <Link
                   to={`/admin/rss-articles/${feed._id}`}
@@ -93,22 +128,35 @@ const TableSection: React.FC<TableSectionProps> = ({
                   day: "numeric",
                 })}
               </td>
-              <td className="px-6 py-4">
-                <button
-                  className="text-gray-400 hover:text-blue-600 p-1 rounded-md"
-                  title="Copy"
-                  onClick={() =>
-                    (window.location.href = `/copy-rss-article/${feed._id}`)
-                  }
-                >
-                  <Copy className="h-5 w-5" />
-                </button>
-                <input
-                  type="checkbox"
-                  className="custom-checkbox ml-2"
-                  checked={selectedArticles.includes(feed._id)}
-                  onChange={() => handleToggle(feed._id)}
-                />
+              <td className="px-6 py-4 flex gap-2">
+                <div className="relative group">
+                  <button
+                    className="text-gray-400 hover:text-blue-600 p-1 rounded-md"
+                    title="Copy"
+                    onClick={() =>
+                      (window.location.href = `/copy-rss-article/${feed._id}`)
+                    }
+                  >
+                    <Copy className="h-5 w-5" />
+                  </button>
+                  <span className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-200 text-black text-xs rounded py-1 px-2">
+                    Copy
+                  </span>
+                </div>
+                <div className="relative group">
+                  <button
+                    className="text-gray-400 hover:text-blue-600 p-1 rounded-md"
+                    title="Copy"
+                    onClick={() =>
+                      (window.location.href = `/copy-rss-article/${feed._id}`)
+                    }
+                  >
+                    <Sparkles className="h-5 w-5" />
+                  </button>
+                  <span className="absolute right-2 bottom-full mb-2 hidden group-hover:block bg-gray-200 text-black text-xs rounded py-1 px-2">
+                    Regenerate
+                  </span>
+                </div>
               </td>
             </tr>
           ))}

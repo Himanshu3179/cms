@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import { Navbar } from "./components/Navbar";
-import Footer from "./components/Footer";
 import Dashboard from "./pages/Dashboard";
 import Loader from "./components/Loader";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -26,6 +25,10 @@ import CopyRssArticle from "./pages/CopyRssArticle";
 import AIEditor from "./pages/admin/AIEditor";
 import { SelectedArticlesProvider } from "./context/SelectedArticlesContext";
 import MyArticleById from "./pages/MyArticleById";
+import SourceManagement from "./pages/admin/SourceManagement";
+import AIGeneratedArticles from "./pages/admin/AIGeneratedArticles";
+import AIGeneratedArticleById from "./pages/admin/AIGeneratedArticleById";
+import CalendarView from "./components/CalendarView";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -145,6 +148,19 @@ const App = () => {
                 <Route path="user-articles/:id" element={<UserArticleById />} />
                 <Route path="user-management" element={<UserManagement />} />
                 <Route path="ai-editor" element={<AIEditor />} />
+                <Route
+                  path="source-management"
+                  element={<SourceManagement />}
+                />
+                <Route
+                  path="ai-generated-articles"
+                  element={<AIGeneratedArticles />}
+                />
+                <Route
+                  path="ai-generated-articles/:id"
+                  element={<AIGeneratedArticleById />}
+                />
+                <Route path="calendar" element={<CalendarView />} />
                 <Route path="settings/profile" element={<Profile />} />
                 {/* <Route path="settings/account" element={<Account />} /> */}
                 <Route

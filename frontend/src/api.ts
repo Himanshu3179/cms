@@ -2,6 +2,7 @@ import axios from "axios";
 import { Feed, FeedResponse, FiltersResponse } from "./types/feeds";
 import { AdminArticle } from "./types/adminArticles";
 import { User } from "./types/users";
+import { AiArticle } from "./types/aiArticles";
 import { Article } from "./types/article";
 
 // Base URL for the backend API
@@ -360,6 +361,64 @@ export const getAvailableModelAuthors = async (): Promise<{
     throw new Error(
       error.response?.data?.message ||
         "Failed to fetch available model authors."
+    );
+  }
+};
+
+// AI Articles Generator API
+export const generateMultipleAiArticles = async (data: {
+  modelAuthor: string;
+  filters: {
+    category?: string[];
+    sourceUrl?: string;
+    pubDate?: string;
+    search?: string;
+  };
+  numberOfArticles: number;
+  userInstructions: string;
+}): Promise<{ generatedArticles: any[] }> => {
+  try {
+    const response = await instance.post<{ generatedArticles: any[] }>(
+      "/ai-articles/generate-multiple",
+      data
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ API Error in generateMultipleAiArticles:",
+      error.response
+    );
+    throw new Error(
+      error.response?.data?.message || "Failed to generate AI articles."
+    );
+  }
+};
+
+// AI Articles API
+export const fetchAIGeneratedArticles = async (): Promise<AiArticle[]> => {
+  try {
+    const response = await instance.get<AiArticle[]>("/ai-generated-articles");
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch AI-generated articles."
+    );
+  }
+};
+
+// fetchAIGeneratedArticleById
+
+export const fetchAIGeneratedArticleById = async (
+  id: string
+): Promise<AiArticle> => {
+  try {
+    const response = await instance.get<AiArticle>(
+      `/ai-generated-articles/${id}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch AI-generated article."
     );
   }
 };

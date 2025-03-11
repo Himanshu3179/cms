@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { fetchFeeds, fetchFilters } from "../../api";
+import {
+  fetchFeeds,
+  fetchFilters,
+  generateMultipleAiArticles,
+  getAvailableModelAuthors,
+} from "../../api";
 import { Feed } from "../../types/feeds";
 import HeaderSection from "../../components/HeaderSection";
 import TableSection from "../../components/TableSection";
 import FilterPopup from "../../components/FilterPopup";
-import { X } from "lucide-react";
+import { AlignJustify, LayoutGrid, X } from "lucide-react";
+import toast from "react-hot-toast";
+import GroupSection from "../../components/GroupSection";
 
 interface Filters {
   categories: string[];
@@ -32,6 +39,14 @@ const RSSArticles: React.FC = () => {
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [clearTableSelection, setClearTableSelection] = useState(false);
+
+  // State for AI Article Generation
+  const [numberOfArticles, setNumberOfArticles] = useState<number>(10);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedArticles, setGeneratedArticles] = useState<any[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
   useEffect(() => {
     const loadFilters = async () => {
@@ -77,6 +92,22 @@ const RSSArticles: React.FC = () => {
     loadFeeds();
   }, [currentPage, searchQuery, selectedFilters]);
 
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const data = await getAvailableModelAuthors();
+        setAvailableModels(data.models);
+        if (data.models.length > 0) {
+          setSelectedModel(data.models[0]); // Set the first model as the selected model
+        }
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
+
+    loadModels();
+  }, []);
+
   const clearFilters = () => {
     setSelectedFilters({
       categories: [],
@@ -106,6 +137,29 @@ const RSSArticles: React.FC = () => {
   const handleClearTableSelection = () => {
     setClearTableSelection(true);
     setTimeout(() => setClearTableSelection(false), 0); // Reset the state after clearing
+  };
+
+  const handleGenerateArticles = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await generateMultipleAiArticles({
+        modelAuthor: selectedModel,
+        filters: {
+          category: selectedFilters.categories,
+          sourceUrl: selectedFilters.sourceUrl,
+          pubDate: selectedFilters.pubDate,
+          search: searchQuery,
+        },
+        numberOfArticles,
+        userInstructions: "Generate articles based on the selected filters.",
+      });
+      setGeneratedArticles(response.generatedArticles);
+      toast.success("Articles generated successfully");
+    } catch (err: any) {
+      toast.error("Failed to generate articles");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (loading) {
@@ -169,13 +223,58 @@ const RSSArticles: React.FC = () => {
           </button>
         </div>
       )}
+      <div className="flex justify-end mb-4 ">
+        <div className="bg-gray-300 p-1 rounded-lg">
+          <button
+            className={`p-2 rounded-l-lg ${
+              viewMode === "table" ? "bg-gray-300" : "bg-white"
+            }`}
+            onClick={() => setViewMode("table")}
+            style={{ outline: "none", boxShadow: "none" }}
+          >
+            <AlignJustify className="h-4 w-4" />
+          </button>
+          <button
+            className={`p-2 rounded-r-lg  ${
+              viewMode === "grid" ? "bg-gray-300" : "bg-white"
+            }`}
+            onClick={() => setViewMode("grid")}
+            style={{ outline: "none", boxShadow: "none" }}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
+      {viewMode === "table" ? (
+        <TableSection
+          feeds={feeds}
+          selectedFilters={selectedFilters}
+          toggleCategoryFilter={toggleCategoryFilter}
+          clearTableSelection={clearTableSelection} // Pass the state to clear table selection
+        />
+      ) : (
+        <GroupSection
+          feeds={feeds}
+          selectedFilters={selectedFilters}
+          toggleCategoryFilter={toggleCategoryFilter}
+          clearTableSelection={clearTableSelection} // Pass the state to clear table selection
+        />
+      )}
+      {/* 
       <TableSection
         feeds={feeds}
         selectedFilters={selectedFilters}
         toggleCategoryFilter={toggleCategoryFilter}
         clearTableSelection={clearTableSelection} // Pass the state to clear table selection
-      />
+      /> */}
+
+      {/* <GroupSection
+        feeds={feeds}
+        selectedFilters={selectedFilters}
+        toggleCategoryFilter={toggleCategoryFilter}
+        clearTableSelection={clearTableSelection} // Pass the state to clear table selection
+      /> */}
 
       {isFilterOpen && (
         <FilterPopup
@@ -207,6 +306,62 @@ const RSSArticles: React.FC = () => {
           Next
         </button>
       </div>
+
+      {/* <div className="mt-6 p-4 border border-gray-300 rounded-md">
+        <h2 className="text-lg font-semibold text-gray-700">
+          Generate Articles
+        </h2>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Number of Articles
+        </label>
+        <input
+          type="number"
+          value={numberOfArticles}
+          onChange={(e) => setNumberOfArticles(Number(e.target.value))}
+          min="1"
+          className="block w-full p-2 border border-gray-300 rounded-md mb-4"
+        />
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Choose AI Model
+        </label>
+        <select
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded-md mb-4"
+        >
+          {availableModels.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleGenerateArticles}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500"
+          disabled={isGenerating}
+        >
+          {isGenerating ? "Generating..." : "Generate"}
+        </button>
+      </div>
+
+      {generatedArticles.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">
+            Generated Articles
+          </h2>
+          <ul className="space-y-4">
+            {generatedArticles.map((article, index) => (
+              <li key={index} className="p-4 border border-gray-300 rounded-md">
+                <h3 className="text-xl font-bold mb-2">{article.title}</h3>
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: article.processedContent }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )} */}
     </div>
   );
 };
