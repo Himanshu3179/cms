@@ -6,9 +6,14 @@ export interface Feed {
   pubDate?: string;
   category: string[];
   customCategory: string[];
-  rejectedCategories: string[];
-  sourceUrl?: string;
+  sourceUrl: string;
   fetchedAt?: string;
+  guid: object;
+  seoTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  slug?: string;
+  content?: string;
   createdAt?: string;
   updatedAt?: string;
 }

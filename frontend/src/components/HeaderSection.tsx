@@ -1,14 +1,14 @@
 import React from "react";
 import { X, Filter, Brain } from "lucide-react";
-import { useSelectedArticles } from "../context/SelectedArticlesContext"; // Import context
+import { useSelectedArticles } from "../context/SelectedArticlesContext";
 import { NavLink } from "react-router-dom";
 
 interface HeaderSectionProps {
   searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setSearchQuery: (query: string) => void; // Updated type
   setIsFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
   clearSearchQuery: () => void;
-  clearTableSelection: () => void; // Add this prop to clear table selection
+  clearTableSelection: () => void;
 }
 
 const HeaderSection: React.FC<HeaderSectionProps> = ({
@@ -17,7 +17,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   setIsFilterOpen,
   clearSearchQuery,
 }) => {
-  const { selectedArticles } = useSelectedArticles(); // Get selected articles and clearArticles function
+  const { selectedArticles } = useSelectedArticles();
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

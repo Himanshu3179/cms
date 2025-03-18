@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { fetchFeedById } from "../api";
 import { Feed } from "../types/feeds";
 import { ArrowLeft } from "lucide-react";
@@ -15,6 +16,7 @@ const RssArticleById: React.FC = () => {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const handleToggle = (id: string) => {
     if (selectedArticles.includes(id)) {
       removeArticle(id);
@@ -26,10 +28,8 @@ const RssArticleById: React.FC = () => {
   useEffect(() => {
     const loadFeed = async () => {
       try {
-        if (id) {
-          const data = await fetchFeedById(id);
-          setFeed(data);
-        }
+        const data = await fetchFeedById(id);
+        setFeed(data);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -41,79 +41,134 @@ const RssArticleById: React.FC = () => {
   }, [id]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p className="text-center py-8">Loading...</p>;
   }
 
   if (error) {
-    return <p className="text-red-500">{error}</p>;
+    return <p className="text-center text-red-500 py-8">{error}</p>;
   }
 
   if (!feed) {
-    return <p>Feed not found</p>;
+    return <p className="text-center py-8">Feed not found</p>;
   }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 px-4 py-2 flex gap-2 items-center bg-gray-200 rounded-lg hover:bg-gray-00"
+          className="flex gap-2 items-center bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg"
         >
           <ArrowLeft size={20} />
-          Back
+          <span>Back</span>
         </button>
-        <div className="flex gap-2 justify-center items-center">
-          <p>Add to AI Editor</p>
+        <div className="flex gap-2 items-center">
+          <span className="font-medium">Add to AI Editor</span>
           <input
             type="checkbox"
-            className="custom-checkbox ml-2"
+            className="ml-2"
             checked={selectedArticles.includes(id)}
             onChange={() => handleToggle(id)}
           />
         </div>
       </div>
-      <div className="max-w-4xl mx-auto px-4 ">
+
+      {/* Main Feed Details */}
+      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
         <h1 className="text-3xl font-bold mb-4">{feed.title}</h1>
         <div
-          className="text-gray-600 mb-4"
+          className="text-gray-700 mb-4"
           dangerouslySetInnerHTML={{ __html: feed.description }}
         />
         <div className="flex flex-wrap gap-2 mb-4">
-          {feed.category.map((category, index) => (
+          {feed.category.map((cat, idx) => (
             <span
-              key={index}
-              className="px-3 py-1 rounded-full text-sm"
-              style={{ backgroundColor: "#E5E7EB", color: "#1F2937" }}
+              key={idx}
+              className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
             >
-              {category}
+              {cat}
             </span>
           ))}
         </div>
-        <div>
+        {feed.customCategory.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {feed.customCategory.map((cat, idx) => (
+              <span
+                key={idx}
+                className="px-3 py-1 rounded-full text-sm bg-blue-200 text-blue-800"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Render Markdown content */}
+        <div className="prose prose-indigo max-w-none mb-8">
+          <ReactMarkdown>{feed.content}</ReactMarkdown>
+        </div>
+
+        {/* Source and Link placed below the content */}
+        <div className="mb-4 space-y-2">
           <div>
-            Source :-
+            <span className="font-semibold">Source:</span>{" "}
             <Link
               to={feed.sourceUrl}
-              className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+              className="text-blue-600 hover:text-blue-800 underline"
             >
-              {" "}
               {feed.sourceUrl}
             </Link>
           </div>
           <div>
-            Link :-
+            <span className="font-semibold">Link:</span>{" "}
             <Link
               to={feed.link}
-              className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+              className="text-blue-600 hover:text-blue-800 underline"
             >
-              {" "}
               {feed.link}
             </Link>
           </div>
+          <p className="text-sm text-gray-500">
+            Published on: {new Date(feed.pubDate).toLocaleDateString()}
+          </p>
         </div>
-        <p className="text-sm text-gray-500 mt-4">
-          Published on: {new Date(feed.pubDate).toLocaleDateString()}
-        </p>
+      </div>
+
+      {/* SEO Details */}
+      <div className="bg-gray-50 shadow-sm rounded-lg p-6 mb-8">
+        <h2 className="text-2xl font-semibold mb-4">SEO &amp; Metadata</h2>
+        <div className="space-y-2">
+          <div>
+            <span className="font-semibold">SEO Title:</span> {feed.seoTitle}
+          </div>
+          <div>
+            <span className="font-semibold">Meta Description:</span> {feed.metaDescription}
+          </div>
+          <div>
+            <span className="font-semibold">Keywords:</span>{" "}
+            {feed.keywords.join(", ")}
+          </div>
+          <div>
+            <span className="font-semibold">Slug:</span> {feed.slug}
+          </div>
+        </div>
+      </div>
+
+      {/* Timestamp Details */}
+      <div className="bg-gray-50 shadow-sm rounded-lg p-6">
+        <h2 className="text-2xl font-semibold mb-4">Timestamps</h2>
+        <div className="space-y-2 text-sm text-gray-600">
+          <div>
+            <span className="font-semibold">Fetched At:</span>{" "}
+            {new Date(feed.fetchedAt).toLocaleString()}
+          </div>
+          <div>
+            <span className="font-semibold">Created At:</span> {feed.createdAt}
+          </div>
+          <div>
+            <span className="font-semibold">Updated At:</span> {feed.updatedAt}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -8,8 +8,11 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
       category,
       sourceUrl,
       pubDate,
+      startDate,
+      endDate,
       sort,
       order,
+      leagues,
       page = 1,
       limit = 10,
     } = req.query;
@@ -29,7 +32,7 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
     // Filter by categories (Ensure filtering is included in MongoDB query)
     if (category) {
       const categories = Array.isArray(category) ? category : [category];
-      query.category = { $in: categories }; // This ensures MongoDB filters by category before fetching
+      query.category = { $in: categories };
     }
 
     // Filter by source URL
@@ -46,8 +49,41 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
       };
     }
 
-    // Sorting
-    const sortField = (sort as string) || "pubDate"; // Default sorting by pubDate
+    // Filter by startDate and endDate
+    if (startDate && endDate) {
+      query.pubDate = {
+        $gte: new Date(startDate as string),
+        $lt: new Date(
+          new Date(endDate as string).setDate(
+            new Date(endDate as string).getDate() + 1
+          )
+        ),
+      };
+    } else if (startDate) {
+      query.pubDate = { $gte: new Date(startDate as string) };
+    } else if (endDate) {
+      query.pubDate = {
+        $lt: new Date(
+          new Date(endDate as string).setDate(
+            new Date(endDate as string).getDate() + 1
+          )
+        ),
+      };
+    }
+
+    // -------------------------------
+    // New Leagues Filter Section
+    // -------------------------------
+    // If the user provides a leagues filter, use text search.
+    if (leagues) {
+      const leaguesArr = Array.isArray(leagues) ? leagues : [leagues];
+      // Joining the array creates a single search string, e.g. "Liga Pro UEFA"
+      query.$text = { $search: leaguesArr.join(" ") };
+    }
+
+    // Sorting: if text search is used, we want to sort by text score as the primary sort
+    // Otherwise, we use the provided sort and order, defaulting to pubDate
+    const sortField = (sort as string) || "pubDate";
     const sortOrder = order === "asc" ? 1 : -1;
 
     // Pagination
@@ -58,17 +94,25 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
     // Fetch total count for accurate pagination
     const totalFeeds = await Feed.countDocuments(query);
 
-    // Fetch the data with filtering in MongoDB
-    const feeds = await Feed.find(query)
-      .sort({ [sortField]: sortOrder })
-      .skip(skip)
-      .limit(pageSize);
+    let feeds;
+    if (query.$text) {
+      // If using text search, project text score and sort by it as primary criteria.
+      feeds = await Feed.find(query, { score: { $meta: "textScore" } })
+        .sort({ score: { $meta: "textScore" }, [sortField]: sortOrder })
+        .skip(skip)
+        .limit(pageSize);
+    } else {
+      feeds = await Feed.find(query)
+        .sort({ [sortField]: sortOrder })
+        .skip(skip)
+        .limit(pageSize);
+    }
 
     res.json({
       data: feeds,
       meta: {
         currentPage: pageNum,
-        totalPages: Math.ceil(totalFeeds / pageSize), // Fix totalPages count
+        totalPages: Math.ceil(totalFeeds / pageSize),
         totalFeeds,
         limit: pageSize,
       },
@@ -78,7 +122,7 @@ export const getFeeds = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// get article by id
+// Get article by id
 export const getFeedById = async (
   req: Request,
   res: Response
@@ -91,6 +135,7 @@ export const getFeedById = async (
     }
 
     res.json(feed);
+
   } catch (error: any) {
     res.status(500).json({ message: "Failed to fetch feed." });
   }

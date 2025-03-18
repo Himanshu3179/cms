@@ -7,7 +7,6 @@ import adminArticleRoutes from "./adminArticleRoutes";
 import adminRoutes from "./adminRoutes";
 import chatRoutes from "./chatRoutes";
 import { adminMiddleware, authMiddleware } from "../middleware/authMiddleware";
-import customCategoryRoutes from "./customCategoryRoutes";
 import aiArticlesGeneratorRoutes from "./aiArticlesGeneratorRoutes";
 import aiArticlesRoutes from "./aiArticlesRoutes"; // Import the new route
 
@@ -40,7 +39,7 @@ router.use("/admin", adminRoutes);
 router.use("/chat", chatRoutes);
 
 // Custom category routes
-router.use("/custom-categories", customCategoryRoutes);
+// router.use("/custom-categories", customCategoryRoutes);
 
 // AI articles generator routes
 router.use("/ai-articles", aiArticlesGeneratorRoutes);

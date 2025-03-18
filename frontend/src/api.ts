@@ -38,8 +38,11 @@ export const fetchFeeds = async (params: {
   category?: string[];
   sourceUrl?: string;
   pubDate?: string;
+  startDate?: string;
+  endDate?: string;
   sort?: string;
   order?: "asc" | "desc";
+  leagues?: string[];
 }): Promise<FeedResponse> => {
   try {
     const response = await instance.get<FeedResponse>("/feeds", { params });

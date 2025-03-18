@@ -1,6 +1,5 @@
-// frontend/src/components/FilterPopup.tsx
 import React from "react";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 
 interface Filters {
   categories: string[];
@@ -15,36 +14,30 @@ interface FilterPopupProps {
     sourceUrl: string;
     pubDate: string;
     sort: string;
+    startDate: string;
+    endDate: string;
+    leagues?: string[];
   };
-  setSelectedFilters: React.Dispatch<
-    React.SetStateAction<{
-      categories: string[];
-      sourceUrl: string;
-      pubDate: string;
-      sort: string;
-    }>
-  >;
+  setSearchParams: React.Dispatch<React.SetStateAction<URLSearchParams>>;
   setIsFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  clearFilters: () => void;
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const FilterPopup: React.FC<FilterPopupProps> = ({
   filters,
   selectedFilters,
-  setSelectedFilters,
+  setSearchParams,
   setIsFilterOpen,
-  clearFilters,
-  setCurrentPage,
 }) => {
-  const toggleCategoryFilter = (category: string) => {
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      categories: prevFilters.categories.includes(category)
-        ? prevFilters.categories.filter((cat) => cat !== category)
-        : [...prevFilters.categories, category],
-    }));
-    setCurrentPage(1);
+  const updateParam = (key: string, value: string) => {
+    setSearchParams((prev) => {
+      const sp = new URLSearchParams(prev.toString());
+      if (value === "") {
+        sp.delete(key);
+      } else {
+        sp.set(key, value);
+      }
+      return sp;
+    });
   };
 
   return (
@@ -59,44 +52,14 @@ const FilterPopup: React.FC<FilterPopupProps> = ({
             <X className="h-6 w-6 text-gray-600" />
           </button>
         </div>
-
         <div className="space-y-6">
-          {/* Categories Section */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">
-              Categories
-            </h4>
-            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2">
-              {filters.categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => toggleCategoryFilter(cat)}
-                  className={`flex items-center justify-between px-4 py-2 rounded-lg border ${
-                    selectedFilters.categories.includes(cat)
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-300"
-                  }`}
-                >
-                  <span className="text-sm">{cat}</span>
-                  {selectedFilters.categories.includes(cat) && (
-                    <Check className="h-4 w-4 text-blue-600" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Source Filter */}
           <div>
             <h4 className="text-sm font-medium text-gray-900 mb-3">Source</h4>
             <select
               value={selectedFilters.sourceUrl}
               onChange={(e) => {
-                setSelectedFilters((prev) => ({
-                  ...prev,
-                  sourceUrl: e.target.value,
-                }));
-                setCurrentPage(1);
+                updateParam("sourceUrl", e.target.value);
               }}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
@@ -115,11 +78,7 @@ const FilterPopup: React.FC<FilterPopupProps> = ({
             <select
               value={selectedFilters.pubDate}
               onChange={(e) => {
-                setSelectedFilters((prev) => ({
-                  ...prev,
-                  pubDate: e.target.value,
-                }));
-                setCurrentPage(1);
+                updateParam("pubDate", e.target.value);
               }}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
@@ -131,44 +90,38 @@ const FilterPopup: React.FC<FilterPopupProps> = ({
               ))}
             </select>
           </div>
-
-          {/* Sort Filter */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Sort By</h4>
-            <div className="space-y-2">
-              {["Default", "Recent", "Published Date"].map((option) => (
-                <label
-                  key={option}
-                  className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name="sort"
-                    value={option.toLowerCase()}
-                    checked={selectedFilters.sort === option.toLowerCase()}
-                    onChange={(e) => {
-                      setSelectedFilters((prev) => ({
-                        ...prev,
-                        sort: e.target.value,
-                      }));
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 text-blue-600"
-                  />
-                  <span className="text-sm">{option}</span>
-                </label>
-              ))}
-            </div>
-          </div>
         </div>
 
-        <div className="mt-8 border-t border-gray-200 pt-6">
-          <button
-            onClick={clearFilters}
-            className="w-full py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Clear All Filters
-          </button>
+        <div className="flex gap-4 mt-4">
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-3">
+              Start Date
+            </h4>
+            <input
+              type="date"
+              value={selectedFilters.startDate}
+              onChange={(e) => {
+                updateParam("startDate", e.target.value);
+                if (!selectedFilters.endDate) {
+                  const nextDay = new Date(e.target.value);
+                  nextDay.setDate(nextDay.getDate() + 1);
+                  updateParam("endDate", nextDay.toISOString().split("T")[0]);
+                }
+              }}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-3">End Date</h4>
+            <input
+              type="date"
+              value={selectedFilters.endDate}
+              onChange={(e) => {
+                updateParam("endDate", e.target.value);
+              }}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
       </div>
     </div>
