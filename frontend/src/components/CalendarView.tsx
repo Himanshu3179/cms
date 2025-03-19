@@ -1,43 +1,26 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Calendar as CalendarIcon,
-  List,
   Filter,
   ChevronLeft,
   ChevronRight,
-  Edit,
-  Eye,
-  Clock,
-  Calendar,
-  Trophy,
-  X,
   Search,
-  Globe,
-  Newspaper,
-  Calendar as CalendarDate,
+  Clock,
 } from "lucide-react";
 import {
   format,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isSameMonth,
   isSameDay,
   addMonths,
   subMonths,
   parseISO,
-  startOfWeek,
-  endOfWeek,
-  addWeeks,
-  subWeeks,
-  addDays,
   setMonth,
   setYear,
 } from "date-fns";
 
 import CalendarMonthView from "./calendar/CalendarMonthView";
-import CalendarWeekView from "./calendar/CalendarWeekView";
-import CalendarListView from "./calendar/CalendarListView";
 import ArticleModal from "./calendar/ArticleModal";
 import HistoryPanel from "./calendar/HistoryPanel";
 import FiltersPanel from "./calendar/FiltersPanel";
@@ -229,7 +212,6 @@ export const mockWebpages = [
 ];
 
 export default function CalendarView() {
-  const [viewMode, setViewMode] = useState<"month" | "week" | "list">("month");
   const [selectedWebpages, setSelectedWebpages] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -260,18 +242,12 @@ export default function CalendarView() {
     });
   }, [selectedWebpages, statusFilter, searchTerm]);
 
+  // Always use month view
   const calendarDays = useMemo(() => {
-    if (viewMode === "month") {
-      const start = startOfMonth(currentDate);
-      const end = endOfMonth(currentDate);
-      return eachDayOfInterval({ start, end });
-    } else if (viewMode === "week") {
-      const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // 0 = Sunday
-      const end = endOfWeek(currentDate, { weekStartsOn: 0 });
-      return eachDayOfInterval({ start, end });
-    }
-    return [];
-  }, [currentDate, viewMode]);
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    return eachDayOfInterval({ start, end });
+  }, [currentDate]);
 
   const getArticlesForDay = (day: Date) => {
     return filteredArticles.filter((article) =>
@@ -280,19 +256,11 @@ export default function CalendarView() {
   };
 
   const nextPeriod = () => {
-    if (viewMode === "month") {
-      setCurrentDate(addMonths(currentDate, 1));
-    } else if (viewMode === "week") {
-      setCurrentDate(addWeeks(currentDate, 1));
-    }
+    setCurrentDate(addMonths(currentDate, 1));
   };
 
   const prevPeriod = () => {
-    if (viewMode === "month") {
-      setCurrentDate(subMonths(currentDate, 1));
-    } else if (viewMode === "week") {
-      setCurrentDate(subWeeks(currentDate, 1));
-    }
+    setCurrentDate(subMonths(currentDate, 1));
   };
 
   const handleArticleClick = (article: Article) => {
@@ -330,41 +298,14 @@ export default function CalendarView() {
 
   return (
     <div className="space-y-6">
-      {/* Header with View Toggle, Search and Filter Button */}
+      {/* Header with Search and Filter Button */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-gray-800">
             Football Articles Calendar
           </h1>
           <div className="bg-white rounded-lg shadow p-1">
-            <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-1.5 rounded ${
-                viewMode === "list"
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <List className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setViewMode("week")}
-              className={`px-3 py-1.5 rounded ${
-                viewMode === "week"
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              <Calendar className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setViewMode("month")}
-              className={`px-3 py-1.5 rounded ${
-                viewMode === "month"
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
+            <button className="px-3 py-1.5 rounded bg-indigo-100 text-indigo-700">
               <CalendarIcon className="h-5 w-5" />
             </button>
           </div>
@@ -431,12 +372,7 @@ export default function CalendarView() {
                     onClick={() => setShowDatePicker(!showDatePicker)}
                     className="text-xl font-semibold flex items-center"
                   >
-                    {viewMode === "month"
-                      ? format(currentDate, "MMMM yyyy")
-                      : `${format(calendarDays[0], "MMM d")} - ${format(
-                          calendarDays[calendarDays.length - 1],
-                          "MMM d, yyyy"
-                        )}`}
+                    {format(currentDate, "MMMM yyyy")}
                     <ChevronRight
                       className={`h-4 w-4 ml-1 transform transition-transform ${
                         showDatePicker ? "rotate-90" : ""
@@ -466,37 +402,12 @@ export default function CalendarView() {
               </div>
             </div>
 
-            {viewMode === "month" && (
-              <CalendarMonthView
-                calendarDays={calendarDays}
-                currentDate={currentDate}
-                getArticlesForDay={getArticlesForDay}
-                handleArticleClick={handleArticleClick}
-              />
-            )}
-            {viewMode === "week" && (
-              <CalendarWeekView
-                calendarDays={calendarDays}
-                filteredArticles={filteredArticles}
-                handleArticleClick={handleArticleClick}
-              />
-            )}
-            {viewMode === "list" && (
-              <CalendarListView
-                filteredArticles={filteredArticles}
-                handleArticleClick={handleArticleClick}
-                setEditMode={setEditMode}
-                setSelectedArticle={setSelectedArticle}
-                setEditedArticle={setEditedArticle}
-                setShowArticleModal={setShowArticleModal}
-                showDatePicker={showDatePicker}
-                setShowDatePicker={setShowDatePicker}
-                currentDate={currentDate}
-                handleMonthChange={handleMonthChange}
-                handleYearChange={handleYearChange}
-                goToToday={goToToday}
-              />
-            )}
+            <CalendarMonthView
+              calendarDays={calendarDays}
+              currentDate={currentDate}
+              getArticlesForDay={getArticlesForDay}
+              handleArticleClick={handleArticleClick}
+            />
           </div>
         </div>
 

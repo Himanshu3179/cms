@@ -4,6 +4,7 @@ import { AdminArticle } from "./types/adminArticles";
 import { User } from "./types/users";
 import { AiArticle } from "./types/aiArticles";
 import { Article } from "./types/article";
+import { ScheduledArticleData } from "./types/scheduledArticle";
 
 // Base URL for the backend API
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -46,6 +47,7 @@ export const fetchFeeds = async (params: {
 }): Promise<FeedResponse> => {
   try {
     const response = await instance.get<FeedResponse>("/feeds", { params });
+    console.log("hello");
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch feeds.");
@@ -58,6 +60,18 @@ export const fetchFeedById = async (id: string): Promise<Feed> => {
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch feed.");
+  }
+};
+
+export const editFeed = async (
+  id: string,
+  feedData: Partial<Feed>
+): Promise<Feed> => {
+  try {
+    const response = await instance.put<Feed>(`/feeds/${id}`, feedData);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to update feed.");
   }
 };
 
@@ -422,6 +436,87 @@ export const fetchAIGeneratedArticleById = async (
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message || "Failed to fetch AI-generated article."
+    );
+  }
+};
+
+// Fetch all scheduled articles
+export const fetchScheduledArticles = async (): Promise<
+  ScheduledArticleData[]
+> => {
+  try {
+    const response = await instance.get<ScheduledArticleData[]>(
+      "/scheduled-articles"
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch scheduled articles."
+    );
+  }
+};
+
+// Fetch a scheduled article by its ID
+export const fetchScheduledArticleById = async (
+  id: string
+): Promise<ScheduledArticleData> => {
+  try {
+    const response = await instance.get<ScheduledArticleData>(
+      `/scheduled-articles/${id}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch scheduled article."
+    );
+  }
+};
+
+// Create a new scheduled article
+export const createScheduledArticle = async (
+  scheduledArticle: Omit<
+    ScheduledArticleData,
+    "_id" | "createdAt" | "updatedAt"
+  >
+): Promise<ScheduledArticleData> => {
+  try {
+    const response = await instance.post<ScheduledArticleData>(
+      "/scheduled-articles",
+      scheduledArticle
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to create scheduled article."
+    );
+  }
+};
+
+// Update an existing scheduled article
+export const updateScheduledArticle = async (
+  id: string,
+  scheduledArticle: Partial<ScheduledArticleData>
+): Promise<ScheduledArticleData> => {
+  try {
+    const response = await instance.put<ScheduledArticleData>(
+      `/scheduled-articles/${id}`,
+      scheduledArticle
+    );
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to update scheduled article."
+    );
+  }
+};
+
+// Delete a scheduled article
+export const deleteScheduledArticle = async (id: string): Promise<void> => {
+  try {
+    await instance.delete(`/scheduled-articles/${id}`);
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to delete scheduled article."
     );
   }
 };

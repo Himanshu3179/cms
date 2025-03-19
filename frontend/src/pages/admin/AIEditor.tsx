@@ -66,30 +66,6 @@ const AIEditor: React.FC = () => {
     loadModels();
   }, []);
 
-  useEffect(() => {
-    const loadArticles = async () => {
-      if (selectedArticles.length === 0) {
-        setArticles([]); // ✅ Reset articles if none are selected
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const fetchedArticles = await Promise.all(
-          selectedArticles.map((id) => fetchFeedById(id))
-        );
-        setArticles(fetchedArticles);
-      } catch (err: any) {
-        console.log(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadArticles();
-  }, [selectedArticles]);
-
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     if (availableModels.includes(selected)) {
@@ -183,6 +159,19 @@ const AIEditor: React.FC = () => {
                 }
               }}
             />
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              onClick={() => {
+                const textarea = document.querySelector(
+                  "textarea"
+                ) as HTMLTextAreaElement;
+                handleSendMessage(textarea.value);
+                textarea.value = "";
+              }}
+              disabled={isGenerating}
+            >
+              Generate
+            </button>
             {/* generating */}
             {isGenerating && (
               <div className="flex gap-2 items-center mt-2">

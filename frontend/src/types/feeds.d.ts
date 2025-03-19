@@ -9,8 +9,6 @@ export interface Feed {
   sourceUrl: string;
   fetchedAt: Date;
   guid: string;
-
-  // New Fields for SEO and Cleaned Content
   seoTitle: string;
   metaDescription?: string;
   keywords: string[];

@@ -1,6 +1,5 @@
 import app from "./app";
 import { connectToDatabase } from "./config/database";
-import { startCronJob } from "./config/cron";
 
 const PORT = process.env.PORT || 5000;
 

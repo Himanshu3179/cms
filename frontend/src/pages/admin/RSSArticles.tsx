@@ -121,8 +121,7 @@ const RSSArticles: React.FC = () => {
     };
 
     loadFeeds();
-  }, [currentPage, searchQuery, selectedFilters]);
-
+  }, [currentPage, searchQuery, JSON.stringify(selectedFilters)]);
   useEffect(() => {
     const loadModels = async () => {
       try {

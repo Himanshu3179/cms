@@ -135,8 +135,25 @@ export const getFeedById = async (
     }
 
     res.json(feed);
-
   } catch (error: any) {
     res.status(500).json({ message: "Failed to fetch feed." });
+  }
+};
+
+// edit
+
+export const editFeed = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const feed = await Feed.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!feed) {
+      res.status(404).json({ message: "Feed not found." });
+      return;
+    }
+
+    res.json(feed);
+  } catch (error: any) {
+    res.status(500).json({ message: "Failed to update feed." });
   }
 };

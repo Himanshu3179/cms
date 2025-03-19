@@ -9,7 +9,7 @@ import chatRoutes from "./chatRoutes";
 import { adminMiddleware, authMiddleware } from "../middleware/authMiddleware";
 import aiArticlesGeneratorRoutes from "./aiArticlesGeneratorRoutes";
 import aiArticlesRoutes from "./aiArticlesRoutes"; // Import the new route
-
+import scheduledArticleRoutes from "./scheduledArticleRoutes";
 const router = Router();
 
 // Feeds routes
@@ -46,5 +46,8 @@ router.use("/ai-articles", aiArticlesGeneratorRoutes);
 
 // AI articles routes
 router.use("/ai-generated-articles", aiArticlesRoutes); // Add the new route
+
+// ...
+router.use("/scheduled-articles", scheduledArticleRoutes);
 
 export default router;

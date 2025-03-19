@@ -28,8 +28,9 @@ import MyArticleById from "./pages/MyArticleById";
 import SourceManagement from "./pages/admin/SourceManagement";
 import AIGeneratedArticles from "./pages/admin/AIGeneratedArticles";
 import AIGeneratedArticleById from "./pages/admin/AIGeneratedArticleById";
-import CalendarView from "./components/CalendarView";
-
+import ScrapedWebsites from "./pages/admin/ScrapedWebsites";
+import FeedEditPage from "./pages/FeedEditPage";
+import ScheduledPosts from "./pages/ScheduledPosts";
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -138,7 +139,12 @@ const App = () => {
                 }
               >
                 <Route path="rss-articles" element={<RSSArticles />} />
+                <Route path="scraped-websites" element={<ScrapedWebsites />} />
                 <Route path="rss-articles/:id" element={<RssArticleById />} />
+                <Route
+                  path="rss-articles/edit/:id"
+                  element={<FeedEditPage />}
+                />
                 <Route path="admin-articles" element={<AdminArticles />} />
                 <Route
                   path="admin-articles/:id"
@@ -160,7 +166,7 @@ const App = () => {
                   path="ai-generated-articles/:id"
                   element={<AIGeneratedArticleById />}
                 />
-                <Route path="calendar" element={<CalendarView />} />
+                <Route path="calendar" element={<ScheduledPosts />} />
                 <Route path="settings/profile" element={<Profile />} />
                 {/* <Route path="settings/account" element={<Account />} /> */}
                 <Route

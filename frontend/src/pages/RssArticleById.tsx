@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { fetchFeedById } from "../api";
 import { Feed } from "../types/feeds";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit, Calendar } from "lucide-react";
 import { useSelectedArticles } from "../context/SelectedArticlesContext";
 
 const RssArticleById: React.FC = () => {
@@ -54,22 +54,47 @@ const RssArticleById: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Top Controls */}
       <div className="flex justify-between items-center mb-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex gap-2 items-center bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg"
-        >
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </button>
         <div className="flex gap-2 items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex gap-2 items-center bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg"
+          >
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </button>
+          <Link
+            to={`/admin/rss-articles/edit/${id}`}
+            className="flex gap-2 items-center text-white bg-blue-500 hover:bg-blue-400 px-4 py-2 rounded-lg"
+          >
+            <Edit size={20} />
+            <span>Edit</span>
+          </Link>
+          <Link
+            to={`/admin/scheduler/${id}`}
+            className="flex gap-2 items-center text-white bg-purple-500 hover:bg-purple-400 px-4 py-2 rounded-lg"
+          >
+            <Calendar size={20} />
+            <span>Schedule</span>
+          </Link>
+        </div>
+        <div className="flex items-center gap-3">
           <span className="font-medium">Add to AI Editor</span>
-          <input
-            type="checkbox"
-            className="ml-2"
-            checked={selectedArticles.includes(id)}
-            onChange={() => handleToggle(id)}
-          />
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={selectedArticles.includes(id)}
+              onChange={() => handleToggle(id)}
+            />
+            <div
+              className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer dark:bg-gray-700 
+              peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+              after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
+              peer-checked:bg-blue-600"
+            ></div>
+          </label>
         </div>
       </div>
 
@@ -108,7 +133,7 @@ const RssArticleById: React.FC = () => {
           <ReactMarkdown>{feed.content}</ReactMarkdown>
         </div>
 
-        {/* Source and Link placed below the content */}
+        {/* Source and Link */}
         <div className="mb-4 space-y-2">
           <div>
             <span className="font-semibold">Source:</span>{" "}
@@ -142,7 +167,8 @@ const RssArticleById: React.FC = () => {
             <span className="font-semibold">SEO Title:</span> {feed.seoTitle}
           </div>
           <div>
-            <span className="font-semibold">Meta Description:</span> {feed.metaDescription}
+            <span className="font-semibold">Meta Description:</span>{" "}
+            {feed.metaDescription}
           </div>
           <div>
             <span className="font-semibold">Keywords:</span>{" "}

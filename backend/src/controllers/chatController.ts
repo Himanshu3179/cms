@@ -68,7 +68,7 @@ export const handleChatRequest = async (
 
     // ✅ Format Articles into Context
     const articleContext = validArticles
-      .map((a: any) => `Title: ${a.title}\nContent: ${a.description}`)
+      .map((a: any) => `Title: ${a.title}\nContent: ${a.content}`)
       .join("\n\n");
 
     // ✅ Construct AI Prompt
